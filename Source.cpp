@@ -5,7 +5,7 @@
 #include <regex>
 #include <sstream>
 #include <map>
-
+#include <cctype>
 
 std::vector<std::string> split_passports(std::string const& input_string)
 {
@@ -29,9 +29,11 @@ std::vector<std::string> split_passports(std::string const& input_string)
 		}
 	}
 	return passportStrings;
-	}
+}
 
-std::map<std::string, std::string> passport_string_to_map(std::string const& passportString) {
+typedef std::map<std::string, std::string> PassportFields; // E.g. {{"byr", "1989"}, {"ecl", "blue"}}
+
+PassportFields passport_string_to_map(std::string const& passportString) {
 	std::stringstream passportStringstream(passportString);
 	std::string segment;
 	std::vector<std::string> seglist;
@@ -55,13 +57,33 @@ std::map<std::string, std::string> passport_string_to_map(std::string const& pas
 	return myMap;
 }
 
-bool passport_is_valid(std::map<std::string, std::string> passportMap) {
+// Return true if maybe_year has 4 digits and is in range [lo, hi]
+bool is_valid_year(const std::string& maybe_year, int lo, int hi)
+{
+	bool ok = maybe_year.size() == 4 && std::all_of(
+		begin(maybe_year), end(maybe_year), [](char c) { return std::isdigit(c) != 0; });
+
+	if (ok)
+	{
+		int year = std::stoi(maybe_year);
+		ok = lo <= year && year <= hi;
+	}
+	return ok;
+}
+
+bool passport_is_valid(PassportFields const& passportMap) {
 	std::string requiredKeys[] = { "byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid" };
 	bool passportValid = true;
-	for (const auto& requiredKey : requiredKeys) {
-		if (passportMap.count(requiredKey) == 0) { 
-			passportValid = false; 
-			break; 
+	for (const auto& requiredKey : requiredKeys)
+	{
+		auto it = passportMap.find(requiredKey);
+		if (it != passportMap.end())
+		{
+			if (requiredKey == "byr" && !is_valid_year(it->second, 1920, 2002)) return false;
+		}
+		else
+		{
+			return false;
 		}
 	}
 	return passportValid;
@@ -73,10 +95,10 @@ void part_1() {
 	buffer << fileContents.rdbuf();
 	std::string fileString = buffer.str();
 	auto passportStrings = split_passports(fileString);
-	std::vector<std::map<std::string, std::string>> passportMaps;
+	std::vector<PassportFields> passportMaps;
 	int validPassportCount = 0;
 	int totalPassports = 0;
-	for (int i = 0; i < passportStrings.size(); i++) { 
+	for (int i = 0; i < passportStrings.size(); i++) {
 		passportMaps.push_back(passport_string_to_map(passportStrings[i]));
 	}
 	for (int i = 0; i < passportMaps.size(); i++) {
