@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <regex>
+#include <set>
 #include <sstream>
 #include <map>
 #include <cctype>
@@ -86,28 +87,26 @@ bool is_valid_height(std::string const& height) {
 		lo = 59;
 		hi = 76;
 	}
-	auto height_num = std::stoi(height.substr(0, index_of_height_unit_start));
-	auto valid = lo <= height_num && height_num <= hi;
+	// Consider ?: ternary operator
+	auto const height_num = std::stoi(height.substr(0, index_of_height_unit_start));
+	auto const valid = lo <= height_num && height_num <= hi;
 	return valid;
 }
 
-bool is_valid_hair_colour(std::string hair_colour) {
+bool is_valid_hair_colour(std::string const& hair_colour) {
 	if (hair_colour[0] != '#') { return false; }
 	if (hair_colour.size() != 7) { return false; }
 	auto colour_characters = hair_colour.substr(1, 7);
-	for (int i = 0; i < colour_characters.size(); i++) {
-		if (std::isxdigit(colour_characters[i] == 0)) {return false;}
+	for (auto const ch : colour_characters) {
+		if (std::isxdigit(ch) == 0) { return false; }
 	}
 	return true;
 }
 
-bool is_valid_eye_colour(std::string const& eye_colour) {
-	std::string allowed_eye_colours [7]  = { "amb", "blu", "brn", "gry", "grn", "hzl", "oth" };
-	for (const auto& colour : allowed_eye_colours)
-	{
-		if (colour == eye_colour) { return true; }
-	}
-	return false;
+bool is_valid_eye_colour(std::string const& eye_colour)
+{
+	std::set<std::string> const allowed_eye_colours = { "amb", "blu", "brn", "gry", "grn", "hzl", "oth" };
+	return allowed_eye_colours.count(eye_colour) != 0;
 }
 
 bool is_valid_passport_id(std::string const& passport_id) {
@@ -121,7 +120,7 @@ bool is_valid_passport_id(std::string const& passport_id) {
 bool passport_is_valid(PassportFields const& passportMap) {
 	std::string requiredKeys[] = { "ecl", "iyr", "eyr", "hgt", "hcl", "pid", "byr" };
 	bool passportValid = true;
-	
+
 	// Are we missing the final iteration in this for?
 	for (const auto& requiredKey : requiredKeys)
 	{
@@ -144,7 +143,7 @@ bool passport_is_valid(PassportFields const& passportMap) {
 	return passportValid;
 }
 
-void part_1() {
+void solve() {
 	std::ifstream fileContents("input.txt");
 	std::stringstream buffer;
 	buffer << fileContents.rdbuf();
@@ -168,6 +167,5 @@ void part_1() {
 }
 
 int main() {
-	part_1();
-	//part_2();
+	solve();
 }
