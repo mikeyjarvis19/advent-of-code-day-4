@@ -71,15 +71,77 @@ bool is_valid_year(const std::string& maybe_year, int lo, int hi)
 	return ok;
 }
 
+bool is_valid_height(std::string const& height) {
+	auto index_of_height_unit_start = height.find_first_of("ci");
+	// This is a bit jank
+	if (index_of_height_unit_start > 10) { return false; }
+	auto unit_string = height.substr(index_of_height_unit_start, 2);
+	auto lo = 0;
+	auto hi = 0;
+	if (unit_string == "cm") {
+		lo = 150;
+		hi = 193;
+	}
+	else if (unit_string == "in") {
+		lo = 59;
+		hi = 76;
+	}
+	auto height_num = std::stoi(height.substr(0, index_of_height_unit_start));
+	auto valid = lo <= height_num && height_num <= hi;
+	return valid;
+}
+
+bool is_valid_hair_colour(std::string hair_colour) {
+	if (hair_colour[0] != '#') { return false; }
+	if (hair_colour.size() != 7) { return false; }
+	auto colour_characters = hair_colour.substr(1, 7);
+	bool valid = false;
+	std::vector<char> allowed_characters = { 'a', 'b', 'c', 'd', 'e', 'f', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+	//for (int i = 0; i < hair_colour.size(); i++) {
+	//	for (int j = 0; j < allowed_characters.size(); j++) {
+	//		if hair_colour
+	//}
+	//for (int i = 0; i < hair_colour.size(); i++) {
+	//	auto current_char = allowed_characters[i];
+	//	if (std::any_of(allowed_characters.begin(), allowed_characters.end(), [](int i) {return allowed_characters[i] == a"; }
+
+	return true;
+}
+
+bool is_valid_eye_colour(std::string const& eye_colour) {
+	std::string allowed_eye_colours [7]  = { "amb", "blu", "brn", "gry", "grn", "hzl", "oth" };
+	for (const auto& colour : allowed_eye_colours)
+	{
+		if (colour == eye_colour) { return true; }
+	}
+	return false;
+}
+
+bool is_valid_passport_id(std::string const& passport_id) {
+	if (passport_id.size() != 9) { return false; }
+	for (const auto& character : passport_id) {
+		if (std::isdigit(character) == 0) { return false; }
+	}
+	return true;
+}
+
 bool passport_is_valid(PassportFields const& passportMap) {
-	std::string requiredKeys[] = { "byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid" };
+	std::string requiredKeys[] = { "ecl", "iyr", "eyr", "hgt", "hcl", "pid", "byr" };
 	bool passportValid = true;
+	
+	// Are we missing the final iteration in this for?
 	for (const auto& requiredKey : requiredKeys)
 	{
 		auto it = passportMap.find(requiredKey);
 		if (it != passportMap.end())
 		{
 			if (requiredKey == "byr" && !is_valid_year(it->second, 1920, 2002)) return false;
+			if (requiredKey == "iyr" && !is_valid_year(it->second, 2010, 2020)) return false;
+			if (requiredKey == "eyr" && !is_valid_year(it->second, 2020, 2030)) return false;
+			if (requiredKey == "hgt" && !is_valid_height(it->second)) return false;
+			if (requiredKey == "hcl" && !is_valid_hair_colour(it->second)) return false;
+			if (requiredKey == "ecl" && !is_valid_eye_colour(it->second)) return false;
+			if (requiredKey == "pid" && !is_valid_passport_id(it->second)) return false;
 		}
 		else
 		{
