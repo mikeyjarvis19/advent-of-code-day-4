@@ -95,16 +95,9 @@ bool is_valid_hair_colour(std::string hair_colour) {
 	if (hair_colour[0] != '#') { return false; }
 	if (hair_colour.size() != 7) { return false; }
 	auto colour_characters = hair_colour.substr(1, 7);
-	bool valid = false;
-	std::vector<char> allowed_characters = { 'a', 'b', 'c', 'd', 'e', 'f', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-	//for (int i = 0; i < hair_colour.size(); i++) {
-	//	for (int j = 0; j < allowed_characters.size(); j++) {
-	//		if hair_colour
-	//}
-	//for (int i = 0; i < hair_colour.size(); i++) {
-	//	auto current_char = allowed_characters[i];
-	//	if (std::any_of(allowed_characters.begin(), allowed_characters.end(), [](int i) {return allowed_characters[i] == a"; }
-
+	for (int i = 0; i < colour_characters.size(); i++) {
+		if (std::isxdigit(colour_characters[i] == 0)) {return false;}
+	}
 	return true;
 }
 
